@@ -1,0 +1,63 @@
+# Бинарные файлы
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+
+# Файлы отладки
+*.pdb
+*.ilk
+*.idb
+*.exp
+*.lib
+
+# Файлы сборки (CMake)
+**/build/        # Игнорируем папку build в любой поддиректории
+**/CMakeCache.txt
+**/CMakeFiles/
+**/cmake_install.cmake
+**/Testing/
+
+# Файлы Qt Creator
+*.user
+*.user.*
+*.layout
+*.autosave
+*.qmlc
+*.qmlcache
+
+# Файлы редактора
+*.swp
+*.swo
+
+# Временные файлы
+*~
+*.bak
+*.log
+*.tmp
+
+# Файлы IDE
+*.vcxproj
+*.vcxproj.user
+*.sln
+*.suo
+*.o
+*.obj
+
+# Папка с отчетами
+**/reports/
+**/test_results/
+
+# папка для зависимостей
+**/external/
+
+# папка для build
+**/out/
+
+# Папка с прото файлами
+**/proto/
+
+# Операционная система
+.DS_Store # macOS
+Thumbs.db # Windows
