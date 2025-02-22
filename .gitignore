@@ -61,3 +61,7 @@
 # Операционная система
 .DS_Store # macOS
 Thumbs.db # Windows
+
+**/.vs/
+.gitignore
+**/build/
