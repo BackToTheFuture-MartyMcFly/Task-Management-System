@@ -3,8 +3,8 @@
 #include <string>
 #include "DataBase.h"
 #include <fstream>
+#include <filesystem>
 #include <sstream>
-#include <optional>
 
 class TextFileDataBase : public DataBase {
 
@@ -26,7 +26,7 @@ public:
 
 private:
 	std::fstream db;
-	std::string fileName;
+	std::string dbPath;
 	bool isConnected;
 
 

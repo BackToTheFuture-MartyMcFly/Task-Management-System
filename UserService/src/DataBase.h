@@ -4,6 +4,7 @@
 #include "User.h"
 #include <iostream>
 #include <vector>
+#include <optional>
 
 class DataBase {
 
