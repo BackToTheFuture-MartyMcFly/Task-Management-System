@@ -18,7 +18,7 @@ public:
 	virtual bool createUser(const User&) = 0;
 	virtual std::optional<User> getUserFromId(int) = 0;
 	virtual bool deleteUserFromId(int) = 0;
-	virtual bool updateUser(const User&) = 0;
+	virtual bool updateUserFromId(int, const User&) = 0;
 	
 
 protected:

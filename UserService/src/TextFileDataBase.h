@@ -20,14 +20,14 @@ public:
 	virtual bool createUser(const User&) override;
 	virtual std::optional<User> getUserFromId(int) override;
 	virtual bool deleteUserFromId(int) override;
-	virtual bool updateUser(const User&) override;
+	virtual bool updateUserFromId(int, const User&) override;
 	
 	std::optional<User> parseUserInfo(const std::string&);
 
 private:
 	std::fstream db;
 	std::string dbPath;
-	bool isConnected;
+	bool connection;
 
 
 };

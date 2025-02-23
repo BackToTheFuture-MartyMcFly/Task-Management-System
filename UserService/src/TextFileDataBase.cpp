@@ -1,18 +1,18 @@
 #include "TextFileDataBase.h"
 
 TextFileDataBase::TextFileDataBase()
-	:db(), dbPath(""), isConnected(false) {}
+	:db(), dbPath(""), connection(false) {}
 
 TextFileDataBase::~TextFileDataBase() {
 	disconnect();
 }
 
 bool TextFileDataBase::connect(const std::string& connectionStr) {
-	if (isConnected)
+	if (isConnect())
 		return true;
 	db.open(connectionStr, std::ios::in | std::ios::out | std::ios::app);
 	if (db.is_open()) {
-		isConnected = true;
+		connection = true;
 		dbPath = connectionStr;
 		return true;
 	}
@@ -22,20 +22,20 @@ bool TextFileDataBase::connect(const std::string& connectionStr) {
 }
 
 void TextFileDataBase::disconnect() {
-	if (isConnected) {
+	if (isConnect()) {
 		db.close();
-		isConnected = false;
+		connection = false;
 	}		
 }
 
 bool TextFileDataBase::isConnect() {
-	return isConnected;
+	return connection;
 }
 
 std::vector<User> TextFileDataBase::getUsersList() {
 	std::vector<User> usersList;
 
-	if (isConnected) {
+	if (isConnect()) {
 		std::string userRecord;
 		db.seekg(0);
 		while (std::getline(db, userRecord)) {
@@ -52,7 +52,7 @@ std::vector<User> TextFileDataBase::getUsersList() {
 }
 
 bool TextFileDataBase::isUnique(const User& user) {
-	if (!isConnected) {
+	if (!isConnect()) {
 		std::cout << "log: [TextFileDataBase::isUnique()] DB not connected" << std::endl;
 		return false;
 	}
@@ -79,7 +79,7 @@ bool TextFileDataBase::isUnique(const User& user) {
 
 
 bool TextFileDataBase::createUser(const User& user) {
-	if (!isConnected) {
+	if (!isConnect()) {
 		std::cout << "log: [TextFileDataBase::createUser()] DB not connected" << std::endl;
 		return false;
 	}
@@ -105,7 +105,7 @@ bool TextFileDataBase::createUser(const User& user) {
 
 std::optional<User> TextFileDataBase::getUserFromId(int id) {
 	std::optional<User> user;
-	if (!isConnected) {
+	if (!isConnect()) {
 		std::cout << "log: [TextFileDataBase::getUserFromId()] DB not connected" << std::endl;
 		return std::nullopt;
 	}
@@ -129,7 +129,7 @@ std::optional<User> TextFileDataBase::getUserFromId(int id) {
 }
 
 bool TextFileDataBase::deleteUserFromId(int id) {
-	if (!isConnected) {
+	if (!isConnect()) {
 		std::cout << "log: [TextFileDataBase::deleteUserFromId()] DB not connected" << std::endl;
 		return false;
 	}
@@ -148,36 +148,21 @@ bool TextFileDataBase::deleteUserFromId(int id) {
 	db.seekg(0);
 	bool userFound = false;
 	while (std::getline(db, userRecord)) {
-		try {
-			size_t sepPos = userRecord.find(",");
-			if (sepPos == std::string::npos) {
-				std::cout << "log: [TextFileDataBase::deleteUserFromId()] invalid record" << std::endl;
-				tmpFile << userRecord << std::endl;
-				continue;
-			}
-			int userId = stoi(userRecord.substr(0, sepPos));
-			if (id == userId) {
-				userFound = true;
-				continue;
-			}
-			tmpFile << userRecord << std::endl;
-		}
-		catch (const std::invalid_argument& e) {
-			std::cout << "log: [TextFileDataBase::deleteUserFromId()] Invalid argument: " << e.what() << " in record: " << userRecord << std::endl;
-			tmpFile << userRecord << std::endl;
+		std::optional<User> userTmp = parseUserInfo(userRecord);
+			
+		if (!userTmp.has_value()) {
+			std::cout << "log: [TextFileDataBase::deleteUserFromId()] DB has invalid record" << std::endl;
 			continue;
 		}
-		catch (const std::out_of_range& e) {
-			std::cout << "log: [TextFileDataBase::deleteUserFromId()] Out of range: " << e.what() << " in record: " << userRecord << std::endl;
-			tmpFile << userRecord << std::endl;
+
+		if (userTmp->getId() == id) {
+			userFound = true;
 			continue;
 		}
-		catch (const std::exception& e) {
-			std::cout << "log: [TextFileDataBase::deleteUserFromId()] An unexpected exception occurred: " << e.what() << " .Skipping record: "  << userRecord << std::endl;
-			tmpFile << userRecord << std::endl;
-			continue;
-		}
+		tmpFile << userRecord << std::endl;
+			
 	}
+
 	tmpFile.close();
 	db.close();
 
@@ -203,13 +188,69 @@ bool TextFileDataBase::deleteUserFromId(int id) {
 	return true;
 }
 
-bool TextFileDataBase::updateUser(const User& user) {
-	std::vector<std::string> recordsInDB;
-	std::string fileContent;
-	while (std::getline(db, fileContent)) {
-		//if (atoi(fileContent.substr(0, fileContent.find(" ")).c_str()) != id)
-			recordsInDB.push_back(fileContent);
+bool TextFileDataBase::updateUserFromId(int id, const User& user) {
+	if (!isConnect()) {
+		std::cout << "log: [TextFileDataBase::updateUserFromId()] DB not connected" << std::endl;
+		return false;
 	}
+
+	std::filesystem::path dbPathFS(dbPath);
+	std::filesystem::path tmpFilePath = dbPathFS.parent_path() / (dbPathFS.stem().string() + ".tmp");
+	std::string tmpFileName = tmpFilePath.string();
+
+	std::ofstream tmpFile(tmpFileName);
+	if (!tmpFile.is_open()) {
+		std::cout << "[TextFileDataBase::updateUserFromId()] Could not open temporary file for writing: " << tmpFileName << std::endl;
+		return false;
+	}
+
+	std::string userRecord;
+	db.seekg(0);
+	bool userUpdate = false;
+	while (std::getline(db, userRecord)) {
+		std::optional<User> userTmp = parseUserInfo(userRecord);
+	
+		if (!userTmp.has_value()) {
+			std::cout << "[TextFileDataBase::updateUserFromId()] DB has invalid record: " << userRecord << std::endl;
+			tmpFile << userRecord << std::endl;
+			continue;
+		}
+
+		if (userTmp->getId() == id) {
+			tmpFile << user.getId() << "," << user.getName() << "," << user.getEmail() << "," << user.getPasswordHash() << std::endl;
+			userUpdate = true;
+			continue;
+		}
+			
+		tmpFile << userRecord << std::endl;
+
+	}
+
+	tmpFile.close();
+	db.close();
+
+	std::error_code errc;
+	std::filesystem::remove(dbPath, errc);
+	if (errc) {
+		std::cout << "log: [TextFileDataBase::updateUserFromId()] Could not delete original file: " << dbPath << " Error: " << errc.message() << std::endl;
+		std::filesystem::remove(tmpFilePath, errc);
+		db.open(dbPath);
+		return false;
+	}
+	std::filesystem::rename(tmpFilePath, dbPath, errc);
+	if (errc) {
+		std::cout << "log: [TextFileDataBase::updateUserFromId()] Could not rename temporary file: " << dbPath << " Error: " << errc.message() << std::endl;
+		std::filesystem::remove(tmpFilePath, errc);
+		db.open(dbPath);
+		return false;
+	}
+
+	db.open(dbPath);
+
+	if(!userUpdate)
+		std::cout << "log:[TextFileDataBase::updateUserFromId()] Don`t have user with id: " << id  << std::endl;
+
+	return userUpdate;
 }
 
 std::optional<User> TextFileDataBase::parseUserInfo(const std::string& userRecord) {
