@@ -65,3 +65,4 @@ Thumbs.db # Windows
 **/.vs/
 .gitignore
 **/build/
+DataBase.txt

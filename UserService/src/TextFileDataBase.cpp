@@ -8,23 +8,34 @@ TextFileDataBase::~TextFileDataBase() {
 }
 
 bool TextFileDataBase::connect(const std::string& connectionStr) {
-	if (isConnect())
+	if (isConnect()) {
+		std::cout << "log: [TextFileDataBase::connect()] The connection has already been established" << std::endl;
 		return true;
+	}
+
+	std::filesystem::path filePath(dbPath);
+
+	if (std::filesystem::exists(filePath) && std::filesystem::file_size(filePath) == 0) {
+		std::cout << "log: [TextFileDataBase::connect()] Database file is empty." << std::endl;
+	}
+		
 	db.open(connectionStr, std::ios::in | std::ios::out | std::ios::app);
 	if (db.is_open()) {
 		connection = true;
 		dbPath = connectionStr;
+		std::cout << "log: [TextFileDataBase::connect()] The connection is established" << std::endl;
 		return true;
 	}
 	else
-		std::cout << "log: [TextFileDataBase::connect()] file not open" << std::endl;
+		std::cout << "log: [TextFileDataBase::connect()] Connection is not established" << std::endl;
 		return false;
 }
 
 void TextFileDataBase::disconnect() {
 	if (isConnect()) {
-		db.close();
+		db.close(); 
 		connection = false;
+		std::cout << "log: [TextFileDataBase::disconnect()] The connection is broken" << std::endl;
 	}		
 }
 
@@ -71,9 +82,13 @@ bool TextFileDataBase::isUnique(const User& user) {
 			user.getName() == userTmp->getName() ||
 			user.getEmail() == userTmp->getEmail())
 		{
+			disconnect();
+			connect(dbPath);
 			return false;
 		}
 	}
+	disconnect();
+	connect(dbPath);
 	return true;
 }
 
@@ -83,11 +98,12 @@ bool TextFileDataBase::createUser(const User& user) {
 		std::cout << "log: [TextFileDataBase::createUser()] DB not connected" << std::endl;
 		return false;
 	}
-		
+
 	if (!isUnique(user)) {
-		std::cout << "log: [TextFileDataBase::createUser()] there is already such a user" << std::endl;			
+		std::cout << "log: [TextFileDataBase::createUser()] there is already such a user" << std::endl;
 		return false;
 	}
+	
 
 	std::stringstream ss;
 	ss << user.getId() << ","
@@ -95,10 +111,11 @@ bool TextFileDataBase::createUser(const User& user) {
 		<< user.getEmail() << ","
 		<< user.getPasswordHash();
 
-	db << ss.str() << std::endl;
+	db << ss.str() << '\n';
 
 	if (!db.good()) {
-		std::cout << "Error: [TextFileDataBase::createUser()] Failed to write to database" << std::endl;
+		std::cout << "log: [TextFileDataBase::createUser()] Failed to write to database" << std::endl;
+		std::cout << db.fail() << "   " << db.bad() << std::endl;
 		return false;
 	}
 }
