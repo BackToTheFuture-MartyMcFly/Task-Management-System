@@ -28,6 +28,4 @@ private:
 	std::fstream db;
 	std::string dbPath;
 	bool connection;
-
-
 };

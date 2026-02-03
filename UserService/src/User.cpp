@@ -18,7 +18,7 @@ void User::setEmail(const std::string& email_) {
 }
 
 void User::setPasswordHash(const std::string& password_) {
-	
+	password_hash = password_;
 }
 
 int User::getId() const{
