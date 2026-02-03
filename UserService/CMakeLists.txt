@@ -16,4 +16,7 @@ src/DataBase.h
 src/TextFileDataBase.h
 )
 
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+
+target_link_libraries(UserService PRIVATE project_spdlog)

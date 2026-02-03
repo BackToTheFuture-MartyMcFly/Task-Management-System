@@ -1,1 +1,0 @@
-cmake -S . -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_SUPPRESS_REGENERATION=ON

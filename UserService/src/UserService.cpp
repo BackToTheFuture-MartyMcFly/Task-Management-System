@@ -10,7 +10,7 @@ int main()
     
     TextFileDataBase db;
     if (!db.connect("D:/C++_projects/TaskManagementSystem/UserService/DataBase.txt"))
-        std::cout << "Error!" << std::endl;
+        spdlog::error("Произошла ошибка!");
     else {
         //db.createUser(user);
         db.deleteUserFromId(2);
