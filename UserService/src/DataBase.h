@@ -1,10 +1,12 @@
 #pragma once
 
 #include <string>
-#include "User.h"
 #include <iostream>
 #include <vector>
 #include <optional>
+
+#include "User.h"
+#include "Logger.h"
 
 class DataBase {
 

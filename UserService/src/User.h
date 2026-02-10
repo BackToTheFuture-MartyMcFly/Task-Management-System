@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <spdlog/spdlog.h>
 
 class User 
 {
