@@ -7,10 +7,10 @@
 int main()
 {
     // переработать использование логгера
-    Logger::init("UserSrvice");
+    LOG_INIT("UserService");
 
-    Logger::getGlobalLogger()->info("HELLO");
-    Logger::getServiceLogger()->info("Hello");
+    LOG_ERROR("Hello");
+    GLOBAL_LOG_ERROR("Hello");
 
     system("PAUSE");
 }

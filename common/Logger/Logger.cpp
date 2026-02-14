@@ -1,15 +1,13 @@
 #include <Logger.h>
 
 std::string Logger::m_service_name = "";
-std::string Logger::m_log_dir = ".\\var\\log";
+std::string Logger::m_log_dir = "\\var\\log";
 std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> Logger::m_service_loggers;
 std::shared_ptr<spdlog::logger> Logger::m_global_logger = nullptr;
 bool Logger::m_initialize = false;
 
 
-void Logger::init(const std::string& service_name,
-	const std::string& log_dir,
-	spdlog::level::level_enum log_level)
+void Logger::init(const std::string& service_name, std::string log_dir, spdlog::level::level_enum log_level)
 {
 	if (m_initialize) {
 		// сообщение о логах
@@ -18,6 +16,9 @@ void Logger::init(const std::string& service_name,
 
 	m_service_name = service_name;
 	m_log_dir = log_dir;
+
+	auto absolute_path = std::filesystem::absolute("..\\..");
+	m_log_dir = absolute_path.string() + m_log_dir;
 
 	if (!std::filesystem::exists(m_log_dir))
 		std::filesystem::create_directories(m_log_dir);
@@ -76,7 +77,7 @@ std::shared_ptr<spdlog::logger> Logger::createServiceLogger(const std::string& s
 		return it->second;
 
 	std::vector<spdlog::sink_ptr> sinks;
-	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
+	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	sinks.push_back(console_sink);
 	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>(m_log_dir + "\\" + service_name + ".log");
 	sinks.push_back(file_sink);
