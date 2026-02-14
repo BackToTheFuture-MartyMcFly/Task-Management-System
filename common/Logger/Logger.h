@@ -33,12 +33,53 @@ public:
 #define LOG_SET_LEVEL(level)    Logger::setLevel(level)
 #define LOG_SHUTDOWN()          Logger::shutdown()
 
-#define LOG_INFO(...)       Logger::getServiceLogger()->info(__VA_ARGS__)
-#define LOG_WARN(...)       Logger::getServiceLogger()->warn(__VA_ARGS__)
-#define LOG_ERROR(...)      Logger::getServiceLogger()->error(__VA_ARGS__)
-#define LOG_DEBUG(...)      Logger::getServiceLogger()->debug(__VA_ARGS__)
-#define LOG_CRITICAL(...)   Logger::getServiceLogger()->critical(__VA_ARGS__)
+#define SRV_LOG_INFO(...)		Logger::getServiceLogger()->info("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+#define SRV_LOG_WARN(...)		Logger::getServiceLogger()->warn("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+#define SRV_LOG_DEBUG(...)		Logger::getServiceLogger()->debug("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+#define SRV_LOG_ERROR(...)		Logger::getServiceLogger()->error("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
 
-#define GLOBAL_LOG_INFO(...)    Logger::getGlobalLogger()->info(__VA_ARGS__)
-#define GLOBAL_LOG_WARN(...)    Logger::getGlobalLogger()->warn(__VA_ARGS__)
-#define GLOBAL_LOG_ERROR(...)   Logger::getGlobalLogger()->error(__VA_ARGS__)
+
+#define GLOBAL_LOG_INFO(...)		Logger::getGlobalLogger()->info("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+#define GLOBAL_LOG_WARN(...)		Logger::getGlobalLogger()->warn("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+#define GLOBAL_LOG_DEBUG(...)		Logger::getGlobalLogger()->debug("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+#define GLOBAL_LOG_ERROR(...)		Logger::getGlobalLogger()->error("[{}:{}] {}", \
+    std::filesystem::path(__FILE__).filename().string(), \
+    __LINE__, \
+    fmt::format(__VA_ARGS__))
+
+#define LOG_INFO(...) \
+        SRV_LOG_INFO(__VA_ARGS__);\
+        GLOBAL_LOG_INFO(__VA_ARGS__);
+
+#define LOG_WARN(...) \
+        SRV_LOG_WARN(__VA_ARGS__);\
+        GLOBAL_LOG_WARN(__VA_ARGS__);
+
+#define LOG_DEBUG(...) \
+        SRV_LOG_DEBUG(__VA_ARGS__);\
+        GLOBAL_LOG_DEBUG(__VA_ARGS__);
+
+#define LOG_ERROR(...) \
+        SRV_LOG_ERROR(__VA_ARGS__);\
+        GLOBAL_LOG_ERROR(__VA_ARGS__);

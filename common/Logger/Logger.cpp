@@ -62,9 +62,8 @@ void Logger::createGlobalLogger() {
 	sinks.push_back(file_sink);
 
 	m_global_logger = std::make_shared<spdlog::logger>("GLOBAL", sinks.begin(), sinks.end());
-
-	m_global_logger->set_level(spdlog::level::info);
-	m_global_logger->flush_on(spdlog::level::warn);
+	m_global_logger->set_pattern("[%Y-%m-%d %T] [%^%l%$] %v");
+	m_global_logger->flush_on(spdlog::level::err);
 
 	spdlog::register_logger(m_global_logger);
 
@@ -83,6 +82,7 @@ std::shared_ptr<spdlog::logger> Logger::createServiceLogger(const std::string& s
 	sinks.push_back(file_sink);
 
 	auto service_logger = std::make_shared<spdlog::logger>(service_name, sinks.begin(), sinks.end());
+	service_logger->set_pattern("[%Y-%m-%d %T] [%^%l%$] %v");
 	service_logger->flush_on(spdlog::level::err);
 
 	spdlog::register_logger(service_logger);
