@@ -10,7 +10,7 @@ bool Logger::m_initialize = false;
 void Logger::init(const std::string& service_name, std::string log_dir, spdlog::level::level_enum log_level)
 {
 	if (m_initialize) {
-		// сообщение о логах
+		// message about logs
 		return;
 	}
 
@@ -27,7 +27,7 @@ void Logger::init(const std::string& service_name, std::string log_dir, spdlog::
 
 	auto logger = createServiceLogger(m_service_name);
 
-	setLevel(log_level); //Вынести в конфигурацию
+	setLevel(log_level); //in future add configuration
 
 	m_initialize = true;
 }
