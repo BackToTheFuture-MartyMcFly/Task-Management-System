@@ -13,9 +13,9 @@ bool TextFileDataBase::connect(const std::string& connectionStr) {
 		return true;
 	}
 
-	std::filesystem::path filePath(dbPath);
+	fs::path filePath(dbPath);
 
-	if (std::filesystem::exists(filePath) && std::filesystem::file_size(filePath) == 0) {
+	if (fs::exists(filePath) && fs::file_size(filePath) == 0) {
 		LOG_INFO("Database file is empty.");
 	}
 		
@@ -116,6 +116,8 @@ bool TextFileDataBase::createUser(const User& user) {
 		LOG_WARN("Failed to write to database");
 		return false;
 	}
+
+	return true;
 }
 
 std::optional<User> TextFileDataBase::getUserFromId(int id) {
@@ -149,8 +151,8 @@ bool TextFileDataBase::deleteUserFromId(int id) {
 		return false;
 	}
 
-	std::filesystem::path dbPathFS(dbPath);
-	std::filesystem::path tmpFilePath = dbPathFS.parent_path() / (dbPathFS.stem().string() + ".tmp");
+	fs::path dbPathFS(dbPath);
+	fs::path tmpFilePath = dbPathFS.parent_path() / (dbPathFS.stem().string() + ".tmp");
 	std::string tmpFileName = tmpFilePath.string();
 	
 	std::ofstream tmpFile(tmpFileName);
@@ -182,17 +184,17 @@ bool TextFileDataBase::deleteUserFromId(int id) {
 	db.close();
 
 	std::error_code errc;
-	std::filesystem::remove(dbPath, errc);
+	fs::remove(dbPath, errc);
 	if (errc) {
 		LOG_ERROR("Could not delete original file: {} Error: {}", dbPath, errc.message());
-		std::filesystem::remove(tmpFilePath, errc);
+		fs::remove(tmpFilePath, errc);
 		db.open(dbPath);
 		return false;
 	}
-	std::filesystem::rename(tmpFilePath, dbPath, errc);
+	fs::rename(tmpFilePath, dbPath, errc);
 	if (errc) {
 		LOG_ERROR("Could not rename temporary file: {} Error: {}", dbPath, errc.message());
-		std::filesystem::remove(tmpFilePath, errc);
+		fs::remove(tmpFilePath, errc);
 		db.open(dbPath);
 		return false;
 	}
@@ -209,8 +211,8 @@ bool TextFileDataBase::updateUserFromId(int id, const User& user) {
 		return false;
 	}
 
-	std::filesystem::path dbPathFS(dbPath);
-	std::filesystem::path tmpFilePath = dbPathFS.parent_path() / (dbPathFS.stem().string() + ".tmp");
+	fs::path dbPathFS(dbPath);
+	fs::path tmpFilePath = dbPathFS.parent_path() / (dbPathFS.stem().string() + ".tmp");
 	std::string tmpFileName = tmpFilePath.string();
 
 	std::ofstream tmpFile(tmpFileName);
@@ -245,17 +247,17 @@ bool TextFileDataBase::updateUserFromId(int id, const User& user) {
 	db.close();
 
 	std::error_code errc;
-	std::filesystem::remove(dbPath, errc);
+	fs::remove(dbPath, errc);
 	if (errc) {
 		LOG_ERROR("Could not delete original file: {} Error: {}", dbPath, errc.message());
-		std::filesystem::remove(tmpFilePath, errc);
+		fs::remove(tmpFilePath, errc);
 		db.open(dbPath);
 		return false;
 	}
-	std::filesystem::rename(tmpFilePath, dbPath, errc);
+	fs::rename(tmpFilePath, dbPath, errc);
 	if (errc) {
 		LOG_ERROR("Could not rename temporary file: {} Error: {}", dbPath, errc.message());
-		std::filesystem::remove(tmpFilePath, errc);
+		fs::remove(tmpFilePath, errc);
 		db.open(dbPath);
 		return false;
 	}

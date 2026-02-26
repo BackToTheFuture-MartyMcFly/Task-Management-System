@@ -6,19 +6,16 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <filesystem>
 
+namespace fs = std::filesystem;
+
 class Logger {
 	private:
-		static std::string m_service_name;
-		static std::string m_log_dir;
 		static std::shared_ptr<spdlog::logger> m_global_logger;
 		static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> m_service_loggers;
-		static bool m_initialize;
+		static bool m_initialize_global_log;
 
 public:
-	static void init(const std::string& service_name, 
-					 std::string log_dir = "\\var\\log", 
-					 spdlog::level::level_enum log_level = spdlog::level::info);
-
+	static void init(const std::string& service_name, spdlog::level::level_enum log_level = spdlog::level::info);
 	static std::shared_ptr<spdlog::logger> getServiceLogger(const std::string& service_name = "");
 	static std::shared_ptr<spdlog::logger> getGlobalLogger();
 	static void createGlobalLogger();
@@ -28,43 +25,41 @@ public:
 
 };
 
-
 #define LOG_INIT(...)           Logger::init(__VA_ARGS__)
 #define LOG_SET_LEVEL(level)    Logger::setLevel(level)
 #define LOG_SHUTDOWN()          Logger::shutdown()
 
 #define SRV_LOG_INFO(...)		Logger::getServiceLogger()->info("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 #define SRV_LOG_WARN(...)		Logger::getServiceLogger()->warn("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 #define SRV_LOG_DEBUG(...)		Logger::getServiceLogger()->debug("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 #define SRV_LOG_ERROR(...)		Logger::getServiceLogger()->error("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 
-
 #define GLOBAL_LOG_INFO(...)		Logger::getGlobalLogger()->info("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 #define GLOBAL_LOG_WARN(...)		Logger::getGlobalLogger()->warn("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 #define GLOBAL_LOG_DEBUG(...)		Logger::getGlobalLogger()->debug("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 #define GLOBAL_LOG_ERROR(...)		Logger::getGlobalLogger()->error("[{}:{}] {}", \
-    std::filesystem::path(__FILE__).filename().string(), \
+    fs::path(__FILE__).filename().string(), \
     __LINE__, \
     fmt::format(__VA_ARGS__))
 
