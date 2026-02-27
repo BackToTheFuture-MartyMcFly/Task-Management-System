@@ -1,8 +1,11 @@
+project(UserServiceTest)
+
 set(SRC_FILES
 	test_TextFileDataBase.cpp
 )
 
 add_executable(UserServiceTest ${SRC_FILES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE SERVICE_NAME=${PROJECT_NAME})
 
 target_link_libraries(UserServiceTest PRIVATE project_googletest)
 

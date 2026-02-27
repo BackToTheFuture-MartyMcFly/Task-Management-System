@@ -14,6 +14,7 @@ src/TextFileDataBase.h
 
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE SERVICE_NAME=${PROJECT_NAME})
 
 target_link_libraries(UserService PRIVATE common::logger)
 

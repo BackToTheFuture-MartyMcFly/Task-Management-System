@@ -5,12 +5,16 @@
 
 namespace fs = std::filesystem;
 
+#define XSTR(s) STR(s)
+#define STR(s) #s
+#define NAME XSTR(SERVICE_NAME)
+
 class LoggerTest : public testing::Test
 {
 protected:
 	void SetUp() override {
-		name_test_service = "test_service_" + std::to_string(::getpid());
-		log_path = fs::path("../log");
+		name_test_service = NAME;
+		log_path = fs::path("../logs");
 		if (fs::exists(log_path))
 			fs::remove_all(log_path);
 	}
@@ -38,9 +42,34 @@ protected:
 
 TEST_F(LoggerTest, CreateLogFiles) {
 	EXPECT_FALSE(fs::exists(log_path));
-	Logger::init(name_test_service);
+	LOG_INIT(name_test_service);
 	EXPECT_TRUE(fs::exists(log_path));
 }
+
+TEST_F(LoggerTest, CheckingLogContentError) {
+	LOG_INIT(name_test_service);
+	auto LogMessage = "Test log message error";
+	LOG_ERROR("{}", LogMessage);
+	std::string LogContent = readLogFile();
+	EXPECT_TRUE(LogContent.contains(LogMessage));
+}
+
+TEST_F(LoggerTest, CheckingLogContentInfo) {
+	LOG_INIT(name_test_service);
+	auto LogMessage = "Test log message info";
+	LOG_INFO("{}", LogMessage);
+	std::string LogContent = readLogFile();
+	EXPECT_TRUE(LogContent.contains(LogMessage));
+}
+
+TEST_F(LoggerTest, CheckingLogContentWarn) {
+	LOG_INIT(name_test_service);
+	auto LogMessage = "Test log message warn";
+	LOG_WARN("{}", LogMessage);
+	std::string LogContent = readLogFile();
+	EXPECT_TRUE(LogContent.contains(LogMessage));
+}
+
 
 int main(int argc, char** argv) {
 	testing::InitGoogleTest(&argc, argv);
